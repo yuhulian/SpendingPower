@@ -29,7 +29,7 @@ object SpendingPowerLocal {
     /*
     * step1. read and split the raw data and extract ids and features
     */
-    val trainData = sc.textFile("file:\\E:\\【04#项目文档】\\#消费能力指数\\spendingpower_poi.txt")
+    val trainData = sc.textFile("file:\\E:\\【04#项目文档】\\#消费能力指数\\features.txt")
     //trainData: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[18] at textFile
 
     val parsedData = trainData.map { line =>
@@ -43,8 +43,10 @@ object SpendingPowerLocal {
     val features = parsedData.map { x =>
       val label = 1.0
       val features = x._2
-      LabeledPoint(label, features)
-    }.toDF().select("features")
+//      LabeledPoint(label, features)
+      features
+    }
+      //.toDF().select("features")
     //features: org.apache.spark.sql.DataFrame = [features: vector]
 
     /*
@@ -59,12 +61,12 @@ object SpendingPowerLocal {
     //      .fit(features)
     //scaler: org.apache.spark.ml.feature.StandardScalerModel = stdScal_98bd27f7c0fd
 
-    val scaler = new MinMaxScaler()
-      .setInputCol("features")
-      .setOutputCol("scaledFeatures")
-      .fit(features)
+//    val scaler = new MinMaxScaler()
+//      .setInputCol("features")
+//      .setOutputCol("scaledFeatures")
+//      .fit(features)
 
-    val scaledData = scaler.transform(features).select("scaledFeatures")
+//    val scaledData = scaler.transform(features).select("scaledFeatures")
     //scaledData: org.apache.spark.sql.DataFrame = [scaledFeatures: vector]
 
     /*
@@ -72,9 +74,9 @@ object SpendingPowerLocal {
    * 1. build the RowMatrix with org.apache.spark.mllib.linalg.Vector(build the Vector first)
    * 2. compute Principal Components
    */
-    val scaledDataRDD = scaledData.map { x: Row =>
-      x.getAs[org.apache.spark.mllib.linalg.Vector](0)
-    }
+//    val scaledDataRDD = scaledData.map { x: Row =>
+//      x.getAs[org.apache.spark.mllib.linalg.Vector](0)
+//    }
 
     /*
     //another appoach to transform
@@ -83,7 +85,7 @@ object SpendingPowerLocal {
     }
   */
 
-    val rm = new RowMatrix(scaledDataRDD)
+    val rm = new RowMatrix(features)
     /*
      *  //if not using scaling
      *  val rm = new RowMatrix(parsedData.map(x=>x._2))
@@ -93,12 +95,14 @@ object SpendingPowerLocal {
     /*
     * use PCA to do feature selection
      */
-    val numPCA = 10
+    val numPCA = 8
     //number of principle components you want to select
     val pc = rm.computePrincipalComponents(numPCA)
+    pc.toArray.foreach(println)
+
     //generate the covariance matrix
     val projected = rm.multiply(pc).rows //generate the matix with columns you selected
-
+    projected.take(10).foreach(println)
     /*
     * do K-means clustering
      */

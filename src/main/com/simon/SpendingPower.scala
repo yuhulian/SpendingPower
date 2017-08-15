@@ -129,9 +129,9 @@ object SpendingPower {
 
 
     //step2. clustering
-    val numClusters = 7
-    val numIterations = 20
-    val runs = 3
+    val numClusters = 10
+    val numIterations = 30
+    val runs = 2
     val clusters = KMeans.train(projected, numClusters, numIterations, runs)
 
     //step3. evaluate the result
