@@ -50,7 +50,7 @@ object SpendingPowerLocal {
     //features: org.apache.spark.sql.DataFrame = [features: vector]
 
     /*
-    * step2. grab the features and scale the data to [-1,1]
+    * step2. standard scaler proved not working well here
     */
 
     //    val scaler = new StandardScaler()
